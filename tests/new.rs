@@ -132,7 +132,7 @@ fn find_member<'a>(metadata: &'a Metadata, name: &str) -> &'a Package {
     metadata
         .packages
         .iter()
-        .find(|p| metadata.workspace_members.contains(&p.id) && p.name == name)
+        .find(|p| metadata.workspace_members.contains(&p.id) && p.name.as_str() == name)
         .unwrap_or_else(|| panic!("{}: `{}` not found", metadata.workspace_root, name,))
 }
 
@@ -152,7 +152,7 @@ fn assert_build_cache_not_exist(workspace_root: &Path) {
 fn assert_bin_names(package: &Package, bins: &BTreeMap<&str, PathBuf>) {
     let mut actual_bins = BTreeMap::<&str, PathBuf>::new();
     for target in &package.targets {
-        assert_eq!(vec!["bin"], target.kind);
+        assert!(target.kind.iter().any(|k| format!("{}", k) == "bin"));
         let path = target
             .src_path
             .strip_prefix(package.manifest_path.parent().unwrap())

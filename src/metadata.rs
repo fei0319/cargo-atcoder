@@ -57,10 +57,12 @@ impl MetadataExt for Metadata {
             _ => unreachable!(),
         };
 
-        all_members(self).find(|p| p.name == name).with_context(|| {
-            let spec = spec.expect("should be present here");
-            format!("`{}` is not a member of the workspace", spec)
-        })
+        all_members(self)
+            .find(|p| p.name.as_str() == name)
+            .with_context(|| {
+                let spec = spec.expect("should be present here");
+                format!("`{}` is not a member of the workspace", spec)
+            })
     }
 
     fn find_bin<'a>(&'a self, bin_name: &str) -> anyhow::Result<(&'a Target, &'a Package)> {
@@ -99,5 +101,5 @@ fn all_bins(package: &Package) -> impl Iterator<Item = &Target> {
     package
         .targets
         .iter()
-        .filter(|Target { kind, .. }| kind.contains(&"bin".to_owned()))
+        .filter(|Target { kind, .. }| kind.iter().any(|k| format!("{}", k) == "bin"))
 }
